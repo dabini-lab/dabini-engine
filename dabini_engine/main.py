@@ -5,7 +5,7 @@ import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from langchain_openai import ChatOpenAI
-from langchain_core.messages import ChatMessage, SystemMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import START, MessagesState, StateGraph
 from pydantic import BaseModel
@@ -51,12 +51,15 @@ class MessageRequest(BaseModel):
 
 @api.post("/messages")
 async def post_messages(request: MessageRequest):
-    input_messages = [
-        ChatMessage(content=msg, role=request.speaker_name) for msg in request.messages
-    ]
+    input_messages = [HumanMessage(content=msg) for msg in request.messages]
     output = app.invoke(
         {"messages": input_messages},
-        config={"configurable": {"thread_id": request.thread_id}},
+        config={
+            "configurable": {
+                "thread_id": request.thread_id,
+                "user_id": request.speaker_name,
+            }
+        },
     )
     last_message = output["messages"][-1]
     return {"response": last_message}
