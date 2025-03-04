@@ -46,11 +46,14 @@ api = FastAPI()
 class MessageRequest(BaseModel):
     messages: list
     thread_id: str
+    speaker_name: str | None = None
 
 
 @api.post("/messages")
 async def post_messages(request: MessageRequest):
-    input_messages = [HumanMessage(content=msg) for msg in request.messages]
+    input_messages = [
+        HumanMessage(content=msg, name=request.speaker_name) for msg in request.messages
+    ]
     output = app.invoke(
         {"messages": input_messages},
         config={"configurable": {"thread_id": request.thread_id}},
