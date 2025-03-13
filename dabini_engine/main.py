@@ -24,7 +24,11 @@ workflow = StateGraph(state_schema=MessagesState)
 # Define the function that calls the model
 def call_model(state: MessagesState):
     system_prompt = (
-        "너의 이름은 다빈이야. " "Answer all questions to the best of your ability."
+        "너의 이름은 다빈이야. "
+        "You will interact with different speakers. "
+        "Each message includes the speaker's name in the metadata. "
+        "Answer all questions to the best of your ability, "
+        "being mindful of who you're talking to."
     )
     messages = [SystemMessage(content=system_prompt)] + state["messages"]
     response = model.invoke(messages)
@@ -51,13 +55,18 @@ class MessageRequest(BaseModel):
 
 @api.post("/messages")
 async def post_messages(request: MessageRequest):
-    input_messages = [HumanMessage(content=msg) for msg in request.messages]
+    input_messages = [
+        HumanMessage(
+            content=msg,
+            additional_kwargs={"speaker": request.speaker_name or "unknown_user"},
+        )
+        for msg in request.messages
+    ]
     output = app.invoke(
         {"messages": input_messages},
         config={
             "configurable": {
                 "thread_id": request.thread_id,
-                "user_id": request.speaker_name,
             }
         },
     )
