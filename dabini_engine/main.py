@@ -1,5 +1,6 @@
 import getpass
 import os
+import logging
 
 import uvicorn
 from dotenv import load_dotenv
@@ -16,6 +17,13 @@ load_dotenv()
 if not os.environ.get("OPENAI_API_KEY"):
     os.environ["OPENAI_API_KEY"] = getpass.getpass("OpenAI API Key:")
 
+# Set up logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 # Initialize model and workflow
 model = ChatOpenAI(model="gpt-4o-mini")
 workflow = StateGraph(state_schema=MessagesState)
@@ -26,9 +34,7 @@ def call_model(state: MessagesState):
     system_prompt = (
         "너의 이름은 다빈이야. "
         "You will interact with different speakers. "
-        "Each message includes the speaker's name in the metadata. "
-        "Answer all questions to the best of your ability, "
-        "being mindful of who you're talking to."
+        "Answer all questions to the best of your ability."
     )
     messages = [SystemMessage(content=system_prompt)] + state["messages"]
     response = model.invoke(messages)
@@ -55,10 +61,11 @@ class MessageRequest(BaseModel):
 
 @api.post("/messages")
 async def post_messages(request: MessageRequest):
+    logger.info(f"Received message request - Thread ID: {request.thread_id}, Speaker: {request.speaker_name}")
     input_messages = [
         HumanMessage(
             content=msg,
-            additional_kwargs={"speaker": request.speaker_name or "unknown_user"},
+            name=request.speaker_name,
         )
         for msg in request.messages
     ]
@@ -71,6 +78,7 @@ async def post_messages(request: MessageRequest):
         },
     )
     last_message = output["messages"][-1]
+    logger.info(f"Generated response for thread {request.thread_id}")
     return {"response": last_message}
 
 
