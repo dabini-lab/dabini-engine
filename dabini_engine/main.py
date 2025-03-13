@@ -1,6 +1,8 @@
 import getpass
 import os
 import logging
+import uuid
+import re
 
 import uvicorn
 from dotenv import load_dotenv
@@ -34,6 +36,7 @@ def call_model(state: MessagesState):
     system_prompt = (
         "너의 이름은 다빈이야. "
         "You will interact with different speakers. "
+        "Their names will be included at the start of their messages in the format '(Speaker: name)'."
         "Answer all questions to the best of your ability."
     )
     messages = [SystemMessage(content=system_prompt)] + state["messages"]
@@ -62,10 +65,10 @@ class MessageRequest(BaseModel):
 @api.post("/messages")
 async def post_messages(request: MessageRequest):
     logger.info(f"Received message request - Thread ID: {request.thread_id}, Speaker: {request.speaker_name}")
+    
     input_messages = [
         HumanMessage(
-            content=msg,
-            name=request.speaker_name,
+            content=f"(Speaker: {request.speaker_name or 'Anonymous'})\n{msg}",
         )
         for msg in request.messages
     ]
