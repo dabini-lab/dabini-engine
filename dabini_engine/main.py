@@ -1,14 +1,13 @@
 import getpass
 import os
 import logging
-import uuid
-import re
 
 import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.prompts import PromptTemplate
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import START, MessagesState, StateGraph
 from pydantic import BaseModel
@@ -35,9 +34,8 @@ workflow = StateGraph(state_schema=MessagesState)
 def call_model(state: MessagesState):
     system_prompt = (
         "너의 이름은 다빈이야. "
-        "You will interact with different speakers. "
-        "Their names will be included at the start of their messages in the format '(Speaker: name)'."
-        "Answer all questions to the best of your ability."
+        "You will converse naturally with speakers marked as '(Speaker: name)'. "
+        "Answer directly without adding any name tags or prefixes."
     )
     messages = [SystemMessage(content=system_prompt)] + state["messages"]
     response = model.invoke(messages)
@@ -61,6 +59,8 @@ class MessageRequest(BaseModel):
     thread_id: str
     speaker_name: str | None = None
 
+# Initialize message template
+human_template = PromptTemplate.from_template("(Speaker: {speaker})\n{message}")
 
 @api.post("/messages")
 async def post_messages(request: MessageRequest):
@@ -68,7 +68,10 @@ async def post_messages(request: MessageRequest):
     
     input_messages = [
         HumanMessage(
-            content=f"(Speaker: {request.speaker_name or 'Anonymous'})\n{msg}",
+            content=human_template.format(
+                speaker=request.speaker_name or "Anonymous",
+                message=msg
+            )
         )
         for msg in request.messages
     ]
