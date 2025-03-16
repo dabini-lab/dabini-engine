@@ -44,7 +44,7 @@ def getconn():
       user=USER,
       password=DB_PASSWORD,
       db=DB,
-      ip_type=IPTypes.PUBLIC,
+      ip_type=IPTypes.PRIVATE,
     )
     return conn
 
