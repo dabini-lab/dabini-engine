@@ -1,7 +1,9 @@
-from fastapi import FastAPI
+from fastapi import APIRouter
 from pydantic import BaseModel
 
 from dabini_engine.services import process_messages
+
+router = APIRouter(prefix="/messages")
 
 
 # Class definitions
@@ -11,11 +13,7 @@ class MessageRequest(BaseModel):
     speaker_name: str | None = None
 
 
-# FastAPI setup
-api = FastAPI()
-
-
-@api.post("/messages")
+@router.post("")
 async def post_messages(request: MessageRequest):
     response = process_messages(
         messages=request.messages,

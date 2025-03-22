@@ -20,4 +20,4 @@ COPY . .
 EXPOSE 8080
 
 # Command to run the FastAPI server
-CMD ["poetry", "run", "uvicorn", "dabini_engine.main:api", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["poetry", "run", "start"]

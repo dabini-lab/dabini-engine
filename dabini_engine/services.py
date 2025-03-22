@@ -6,6 +6,9 @@ from langchain_core.messages import HumanMessage
 
 from dabini_engine.db import get_db_engine
 
+# For backwards compatibility or as a singleton instance
+_default_service = None
+
 
 class MessageService:
     def __init__(self, model_name="gpt-4o"):
@@ -59,10 +62,6 @@ class MessageService:
         )
 
         return response
-
-
-# For backwards compatibility or as a singleton instance
-_default_service = None
 
 
 def get_message_service():

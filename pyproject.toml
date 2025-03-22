@@ -17,6 +17,10 @@ python-dotenv = "^1.0.1"
 sqlalchemy = "^2.0.39"
 uvicorn = "^0.34.0"
 
+[tool.poetry.scripts]
+dev = "dabini_engine.main:dev"
+start = "dabini_engine.main:main"
+
 [build-system]
 requires = ["poetry-core>=2.1.1"]
 build-backend = "poetry.core.masonry.api"
