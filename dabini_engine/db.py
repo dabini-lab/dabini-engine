@@ -49,11 +49,21 @@ def initialize_db():
             CREATE TABLE IF NOT EXISTS message_store (
                 id SERIAL PRIMARY KEY,
                 session_id VARCHAR(255) NOT NULL,
-                message JSON NOT NULL,
-                INDEX idx_session_id (session_id)
+                message JSON NOT NULL
             )
         """
             )
         )
+
+        # Create index separately
+        conn.execute(
+            sqlalchemy.text(
+                """
+            CREATE INDEX IF NOT EXISTS idx_session_id ON message_store (session_id)
+            """
+            )
+        )
+
         conn.commit()
+
     logger.info("Database initialized successfully")
