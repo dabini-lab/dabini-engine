@@ -1,7 +1,8 @@
-import os
 import logging
-from google.cloud.sql.connector import Connector
+import os
+
 import sqlalchemy
+from google.cloud.sql.connector import Connector, IPTypes
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -23,6 +24,7 @@ def getconn():
         user=USER,
         password=DB_PASSWORD,
         db=DB,
+        ip_type=IPTypes.PRIVATE,
     )
     return conn
 
