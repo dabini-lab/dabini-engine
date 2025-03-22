@@ -7,14 +7,11 @@ WORKDIR /app
 # Install Poetry
 RUN pip install --no-cache-dir poetry
 
-# Copy the pyproject.toml and poetry.lock files into the container
-COPY pyproject.toml poetry.lock ./
+# Copy all the files from the current directory to the container
+COPY . .
 
 # Install the dependencies
-RUN poetry install --no-root
-
-# Copy the rest of the application code into the container
-COPY . .
+RUN poetry install
 
 # Expose the port the app runs on
 EXPOSE 8080

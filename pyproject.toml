@@ -4,6 +4,9 @@ version = "0.1.0"
 description = "A FastAPI application using LangChain and OpenAI"
 authors = ["Choi Yeonung <yonsweng@gmail.com>"]
 license = "MIT"
+packages = [
+    { include = "dabini_engine" }
+]
 
 [tool.poetry.dependencies]
 cloud-sql-python-connector = "^1.17.0"
