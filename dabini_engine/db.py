@@ -19,7 +19,7 @@ db_connector = Connector()
 def getconn():
     conn = db_connector.connect(
         INSTANCE_CONNECTION_NAME,
-        "pymysql",
+        "pg8000",
         user=USER,
         password=DB_PASSWORD,
         db=DB,
@@ -29,7 +29,7 @@ def getconn():
 
 # Create connection pool
 db_engine = sqlalchemy.create_engine(
-    "mysql+pymysql://",
+    "postgresql+pg8000://",
     creator=getconn,
 )
 
